@@ -4,9 +4,13 @@ import { nanoid } from "nanoid";
 import Confetti from "react-confetti";
 
 function App() {
+    const [rollNumber, setrollNumber] = React.useState(0);
     const [dice, setDice] = React.useState(allNewDice());
     const [tenzies, setTenzies] = React.useState(false);
-
+    const [record, setRecord] = React.useState(
+        localStorage.getItem("Record", JSON.stringify(rollNumber)) || 0
+    );
+    //console.log(record);
     React.useEffect(() => {
         const allHeld = dice.every((die) => die.isHeld);
         const firstValue = dice[0].value;
@@ -71,9 +75,30 @@ function App() {
                     return die.isHeld ? die : generateNewDie();
                 })
             );
+            setrollNumber((prevRollNumber) => {
+                //console.log(prevRollNumber);
+                return prevRollNumber + 1;
+            });
         } else {
             setTenzies(false);
+            setRecord((prevRecord) => {
+                console.log(prevRecord);
+                console.log(rollNumber);
+                if (prevRecord === 0) {
+                    return localStorage.setItem(
+                        "Record",
+                        JSON.stringify(rollNumber)
+                    );
+                }
+                if (rollNumber < prevRecord) {
+                    return localStorage.setItem(
+                        "Record",
+                        JSON.stringify(rollNumber)
+                    );
+                }
+            });
             setDice(allNewDice());
+            setrollNumber(0);
         }
     }
 
@@ -85,10 +110,19 @@ function App() {
                 its current value between rolls.
             </p>
             <div className="dice-container">{diceElements}</div>
+            <div>
+                <p className="instructions">Number of rolls : {rollNumber}</p>
+            </div>
+
             <button className="roll-dice" onClick={rollDice}>
                 {tenzies ? "New Game" : "Roll"}
             </button>
             {tenzies && <Confetti />}
+
+            <div className="record">
+                <p className="record-title">Record</p>
+                <p className="record-text">Rolls : {record} || Time : </p>
+            </div>
         </main>
     );
 }
